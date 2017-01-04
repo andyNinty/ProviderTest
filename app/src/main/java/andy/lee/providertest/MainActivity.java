@@ -3,21 +3,32 @@ package andy.lee.providertest;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ListView;
+import android.widget.Toast;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
     private String newId;
+    private ListView mListView;
+    private ArrayAdapter<String> mAdapter;
+    private List<String> mList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Button addData = (Button) findViewById(R.id.add_data);
+        mListView = (ListView) findViewById(R.id.listview);
+        mAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, mList);
         addData.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -29,7 +40,9 @@ public class MainActivity extends AppCompatActivity {
                 values.put("phone_number", "18365297886");
                 Uri newUri = getContentResolver().insert(uri, values);
                 newId = newUri.getPathSegments().get(1);
-                Log.e("MainActivity", "newId is" + newId);
+                if (newId != null) {
+                    Toast.makeText(MainActivity.this, "insert success", Toast.LENGTH_SHORT).show();
+                }
             }
         });
         Button queryData = (Button) findViewById(R.id.query_data);
@@ -41,13 +54,15 @@ public class MainActivity extends AppCompatActivity {
                 Cursor cursor = getContentResolver().query(uri, null, null, null, null);
                 if (cursor != null) {
                     while (cursor.moveToNext()) {
-                        int avatarId = cursor.getInt(cursor. getColumnIndex("avatar_id"));
-                        String name = cursor.getString(cursor. getColumnIndex("user_name"));
-                        String number = cursor.getString(cursor.getColumnIndex ("phone_number"));
+                        int avatarId = cursor.getInt(cursor.getColumnIndex("avatar_id"));
+                        String name = cursor.getString(cursor.getColumnIndex("user_name"));
+                        String number = cursor.getString(cursor.getColumnIndex("phone_number"));
+                        mList.add(name + "\n" + number);
                         Log.d("MainActivity", "avatar id is " + avatarId);
                         Log.d("MainActivity", "name is " + name);
                         Log.d("MainActivity", "phone is " + number);
                     }
+                    mListView.setAdapter(mAdapter);
                     cursor.close();
                 }
             }
